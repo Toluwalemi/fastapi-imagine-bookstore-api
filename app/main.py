@@ -1,5 +1,6 @@
 from fastapi import FastAPI
-from app.db import database, User
+
+from app.db import User, database
 
 app = FastAPI(title="BookStore API")
 
