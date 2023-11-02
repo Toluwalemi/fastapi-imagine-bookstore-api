@@ -1,20 +1,25 @@
 version: '3.8'
 
 services:
-  web:
+  bookstore-web:
     build: .
-    command: bash -c 'while !</dev/tcp/db/5432; do sleep 1; done; uvicorn app.main:app --host 0.0.0.0'
+    command: uvicorn app.main:app --reload --workers 1 --host 0.0.0.0 --port 8000
     volumes:
       - .:/app
     ports:
       - 8008:8000
     environment:
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/postgres
+      - DATABASE_URL=postgres://postgres:postgres@web-db:5432/web_dev
+      - DATABASE_TEST_URL=postgres://postgres:postgres@web-db:5432/web_test
+      - ENVIRONMENT=dev
+      - TESTING=0
     depends_on:
-      - db
+      - bookstore-db
 
-  db:
-    image: postgres:15-alpine
+  bookstore-db:
+    build:
+      context: db
+      dockerfile: Dockerfile
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     expose:
@@ -22,7 +27,7 @@ services:
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=postgres
+#      - POSTGRES_DB=postgres
 
 volumes:
   postgres_data:
