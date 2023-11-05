@@ -11,7 +11,7 @@ app = FastAPI()
 register_tortoise(
     app,
     db_url=os.environ.get("DATABASE_URL"),
-    modules={"models": ["app.auth.models"]},
+    modules={"models": ["auth.models"]},
     generate_schemas=False,
     add_exception_handlers=True,
 )
