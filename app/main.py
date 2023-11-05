@@ -1,24 +1,26 @@
-# from fastapi import FastAPI
-#
-# from app.db import User, database
-#
-# app = FastAPI(title="BookStore API")
-#
-#
-# @app.get("/")
-# async def read_root():
-#     return await User.objects.all()
-#
-#
-# @app.on_event("startup")
-# async def startup():
-#     if not database.is_connected:
-#         await database.connect()
-#     # create a dummy entry
-#     await User.objects.get_or_create(email="test@test.com")
-#
-#
-# @app.on_event("shutdown")
-# async def shutdown():
-#     if database.is_connected:
-#         await database.disconnect()
+import os
+
+from fastapi import Depends, FastAPI
+from tortoise.contrib.fastapi import register_tortoise
+
+from app.config import Settings, get_settings
+
+app = FastAPI()
+
+
+register_tortoise(
+    app,
+    db_url=os.environ.get("DATABASE_URL"),
+    modules={"models": ["app.auth.models"]},
+    generate_schemas=False,
+    add_exception_handlers=True,
+)
+
+
+@app.get("/ping")
+async def pong(settings: Settings = Depends(get_settings)):
+    return {
+        "ping": "pong!",
+        "environment": settings.environment,
+        "testing": settings.testing,
+    }
